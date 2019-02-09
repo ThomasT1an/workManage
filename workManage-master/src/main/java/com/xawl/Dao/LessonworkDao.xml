@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 为这个mapper指定一个唯一的namespace，namespace的值习惯上设置成包名+sql映射文件名，这样就能够保证namespace的值是唯一的
+	例如namespace="me.gacl.mapping.userMapper"就是me.gacl.mapping(包名)+userMapper(userMapper.xml文件去除后缀) -->
+<mapper namespace="com.xawl.Dao.LessonworkDao">
+    <!-- 在select标签中编写查询的SQL语句， 设置select标签的id属性为getUser，id属性值必须是唯一的，不能够重复 使用parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型
+        resultType="me.gacl.domain.User"就表示将查询结果封装成一个User类的对象返回 User类就是users表所对应的实体类 -->
+    <!-- 根据id查询得到一个user对象 -->
+    <resultMap id="LessonworkResult" type="com.xawl.Pojo.Lessonwork">
+     <id column="uid" property="uid" javaType="int"/>
+        <association property="user" column="uid"  select="queryUser" />
+    </resultMap>
+    <select id="queryUser" parameterType="int" resultType="com.xawl.Pojo.User">
+        SELECT NAME ,LEVEL FROM db_user
+        WHERE id = #{uid}
+    </select>
+    <select id="getUidbyLesson"  resultType="Integer">
+        select DISTINCT  uid
+        from db_lessonwork WHERE pass=0
+        ORDER BY
+        uid
+    </select>
+    <select id="getLessonwork" parameterType="com.xawl.Pojo.Lessonwork" resultMap="LessonworkResult">
+        select *
+        from db_lessonwork
+        <where>
+            <if test="id!=null and id>0 ">id=#{id}</if>
+            <if test="uid!=null and uid>0">and uid=#{uid}</if>
+            <if test="cid!=null and cid>0">and cid=#{cid}</if>
+            <if test="type!=null and type>0">and type=#{type}</if>
+            <if test="lname!=null and lname!=''">and lname=#{lname}</if>
+            <if test="pass!=null and pass>=0">and pass=#{pass}</if>
+            <if test="part!=null and pass!=''">and part=#{part}</if>
+            <if test="term!=null and term>0">and term=#{term}</if>
+            <if test="pass==null">and pass!=1</if>
+        </where>
+        ORDER BY
+        uid ASC ,type ASC,db_lessonwork.startedDate	DESC
+    </select>
+    <insert id="insertLessonwork" parameterType="com.xawl.Pojo.Lessonwork">
+        insert into db_lessonwork (uid,cid,type,lname,pclasshours,part,coe,classhours,pass,startedDate,term)
+        values(#{uid},#{cid},#{type},#{lname},#{pclasshours},#{part},#{coe},#{classhours},#{pass},#{startedDate},#{term})
+    </insert>
+    <update id="updateLessonworkByPass" parameterType="java.lang.Integer">
+        update db_lessonwork
+        <set>
+            <if test="_parameter !=null and _parameter >=0">pass=#{pass}</if>
+        </set>
+        where pass=0
+    </update>
+    <update id="updateLessonworkById" parameterType="com.xawl.Pojo.Lessonwork">
+        update db_lessonwork
+        <set>
+            <if test="lname!=null and lname!=''">lname=#{lname},</if>
+            <if test="type!=null and type>0">type=#{type},</if>
+            <if test="cid!=null and cid>0">id=#{cid},</if>
+            <if test="pclasshours!=null and pclasshours>0 ">pclasshours=#{pclasshours},</if>
+            <if test="classhours!=null and classhours!=''">classhours=#{classhours},</if>
+            <if test="part!=null and part!=''">part=#{part},</if>
+            <if test="coe!=null and coe>=0">coe=#{coe},</if>
+            <if test="pass!=null and pass>=0">pass=#{pass},</if>
+            <if test="term!=null and term>0">term=#{term},</if>
+            <if test="note!=null and term!=''">note=#{note},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <delete id="deleteLessonworkById" parameterType="Integer">
+        DELETE from db_lessonwork WHERE id = #{id}
+    </delete>
+
+</mapper>

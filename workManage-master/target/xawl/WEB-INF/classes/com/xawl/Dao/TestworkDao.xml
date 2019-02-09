@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 为这个mapper指定一个唯一的namespace，namespace的值习惯上设置成包名+sql映射文件名，这样就能够保证namespace的值是唯一的
+	例如namespace="me.gacl.mapping.userMapper"就是me.gacl.mapping(包名)+userMapper(userMapper.xml文件去除后缀) -->
+<mapper namespace="com.xawl.Dao.TestworkDao">
+    <!-- 在select标签中编写查询的SQL语句， 设置select标签的id属性为getUser，id属性值必须是唯一的，不能够重复 使用parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型
+        resultType="me.gacl.domain.User"就表示将查询结果封装成一个User类的对象返回 User类就是users表所对应的实体类 -->
+    <!-- 根据id查询得到一个user对象 -->
+    <resultMap id="TestworkResult" type="com.xawl.Pojo.Testwork">
+        <id column="uid" property="uid" javaType="int"/>
+        <association property="user" column="uid"  select="queryUser" />
+    </resultMap>
+    <select id="queryUser" parameterType="int" resultType="com.xawl.Pojo.User">
+        SELECT NAME ,LEVEL FROM db_user
+        WHERE id = #{uid}
+    </select>
+    <select id="getUidbyTest"  resultType="Integer">
+        select uid from db_testwork WHERE pass=0 ORDER BY uid
+    </select>
+    <select id="getTestwork" parameterType="com.xawl.Pojo.Testwork" resultMap="TestworkResult">
+        select *
+        from db_testwork
+        <where>
+            <if test="id!=null and id>0 ">id=#{id}</if>
+            <if test="uid!=null and uid>0">and uid=#{uid}</if>
+            <if test="term!=null and term>0">and term=#{term}</if>
+            <if test="lname!=null and lname!=''">and lname=#{lname}</if>
+            <if test="pass!=null and pass!='' ">and pass=#{pass}</if>
+            <if test="term!=null and term>0">and term=#{term}</if>
+            <if test="pass!=null and pass>=0 ">and  pass=#{pass}</if>
+            <if test="pass==null">and pass!=1</if>
+        </where>
+        ORDER BY
+        uid ASC ,db_testwork.statedDate	DESC
+    </select>
+
+    <insert id="insertTestwork" parameterType="com.xawl.Pojo.Testwork">
+        insert into db_testwork (uid,lname,Mpclass,Qpclass,Jnum,Jpclass,paperNum,BpaperNum,
+        QpaperNum,CpaperNum,paperSum,paperPclass,pclassNum,pass,statedDate,term)
+        values(#{uid},#{lname},#{Mpclass},#{Qpclass},#{Jnum},#{Jpclass},#{paperNum},#{BpaperNum},
+        #{QpaperNum},#{CpaperNum},#{paperSum},#{paperPclass},#{pclassNum},#{pass},#{statedDate},#{term})
+    </insert>
+
+    <update id="updateTestworkById" parameterType="com.xawl.Pojo.Testwork">
+    update db_testwork
+    <set>
+        <if test="lname!=null and lname!='' ">lname=#{lname},</if>
+        <if test="Mpclass!=null and Mpclass>=0">Mpclass=#{Mpclass},</if>
+        <if test="Qpclass!=null and Qpclass>=0">Qpclass=#{Qpclass},</if>
+        <if test="Jnum!=null and Jnum>0">Jnum=#{Jnum},</if>
+        <if test="Jpclass!=null and Jpclass>0">Jpclass=#{Jpclass},</if>
+        <if test="paperNum!=null and paperNum>0">paperNum=#{paperNum},</if>
+        <if test="BpaperNum!=null and BpaperNum>=0">BpaperNum=#{BpaperNum},</if>
+        <if test="QpaperNum!=null and QpaperNum>=0">QpaperNum=#{QpaperNum},</if>
+        <if test="CpaperNum!=null and CpaperNum>=0">CpaperNum=#{CpaperNum},</if>
+        <if test="paperSum!=null and paperSum>=0">paperSum=#{paperSum},</if>
+        <if test="paperPclass!=null and paperPclass>=0">paperPclass=#{paperPclass},</if>
+        <if test="pclassNum!=null and pclassNum>=0">pclassNum=#{pclassNum},</if>
+        <if test="pass!=null and pass>=0">pass=#{pass},</if>
+        <if test="term!=null and term>0">term=#{term},</if>
+        <if test="note!=null and term!=''">note=#{note}</if>
+    </set>
+    where id=#{id}
+</update>
+    <update id="updateTestworkByPass" parameterType="java.lang.Integer">
+        update db_testwork
+        <set>
+            <if test="_parameter !=null and _parameter >=0">pass=#{pass}</if>
+        </set>
+        where pass=0
+    </update>
+    <delete id="deleteTestworkById">
+        DELETE from db_testwork WHERE id = #{id}
+    </delete>
+
+</mapper>
